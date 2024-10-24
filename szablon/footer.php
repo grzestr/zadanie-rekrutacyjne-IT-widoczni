@@ -3,7 +3,11 @@
 <script src="https://cdn.datatables.net/v/bs5/dt-2.1.8/datatables.min.js"></script>
 <?php if ($isddtable): ?>
     <script>
-        let table = new DataTable('#dttable');
+        $(document).ready( function () {
+          $('.dttable').each(function(){
+            $(this).DataTable()
+          });
+        } );
     </script>
 <?php endif; ?>
   </body>

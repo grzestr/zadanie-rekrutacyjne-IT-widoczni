@@ -1,4 +1,5 @@
-<div class="container py5 text-center">
+<?php include_once 'header.php'; ?>
+<div class="container py-5 text-center">
     <div class="row">
         <h1><?php echo $pname; ?></h1>
         <nav aria-label="breadcrumb">

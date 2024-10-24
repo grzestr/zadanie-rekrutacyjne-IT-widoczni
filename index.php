@@ -1,6 +1,5 @@
 <?php
 @require_once 'config.php';
-@include_once 'szablon/header.php';
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'start';
 
@@ -33,6 +32,7 @@ switch ($action) {
         break;
     case 'details':
         $pname = 'Szczegóły klienta';
+        $isddtable = true;
         $id = isset($_GET['id']) ? $_GET['id'] : 0;
         if ($id == 0) {
             die('Nieprawidłowe ID klienta');
@@ -112,7 +112,7 @@ switch ($action) {
             $klient['pakiety'][] = $row;
         }
 
-        @require_once 'szablon/details.php';
+        @require_once 'szablon/details.php';    
         break;
     }
 

@@ -1,4 +1,5 @@
-<div class="container py5">
+<?php include_once 'header.php'; ?>
+<div class="container py-5">
     <div class="row">
         <h1><?php echo $pname; ?></h1>
         <nav aria-label="breadcrumb">
@@ -7,7 +8,7 @@
                 <li class="breadcrumb-item active" aria-current="page"><a href="#"><?php echo $pname; ?></a></li>
             </ol>
         </nav>
-        <table id="dttable" class="table table-striped">
+        <table class="table table-striped dttable">
             <thead>
                 <tr>
                     <th>Nazwa</th>
