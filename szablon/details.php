@@ -140,3 +140,4 @@ var_dump($klient);
 
 echo "</pre>";
 ?>
+<?php @include_once 'footer.php'; ?>
