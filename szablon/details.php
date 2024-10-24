@@ -133,11 +133,11 @@
     </div>
 </div>
 <?php
-echo "<pre>";
+/*echo "<pre>";
 echo "Klient:\n";
 var_dump($klient);
 
 
-echo "</pre>";
+echo "</pre>"; */
 ?>
 <?php @include_once 'footer.php'; ?>
