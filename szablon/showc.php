@@ -1,7 +1,7 @@
 <div class="container py5">
     <div class="row">
         <h1>Lista klientów</h1>
-        <table class="table table-striped">
+        <table id="dttable" class="table table-striped">
             <thead>
                 <tr>
                     <th>Nazwa</th>
