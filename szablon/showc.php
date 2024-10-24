@@ -1,14 +1,20 @@
 <div class="container py5">
     <div class="row">
-        <h1>Lista klientów</h1>
+        <h1><?php echo $pname; ?></h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item" aria-current="page"><a href="/"><?php echo CMS_NAME; ?></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="#"><?php echo $pname; ?></a></li>
+            </ol>
+        </nav>
         <table id="dttable" class="table table-striped">
             <thead>
                 <tr>
                     <th>Nazwa</th>
                     <th>Strona</th>
-                    <th>Szczegóły</th>                    
-                    <th>Edytuj</th>
-                    <th>Usuń</th>
+                    <th data-dt-order="disable">Szczegóły</th>                    
+                    <th data-dt-order="disable">Edytuj</th>
+                    <th data-dt-order="disable">Usuń</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,5 +29,12 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+</div>
+<div class="container py5 text-center">
+    <div class="row">
+        <div class="list-group">
+            <a href="/?action=addc" class="list-group-item list-group-item-action">Dodaj klienta</a>
+        </div>
     </div>
 </div>
