@@ -158,6 +158,19 @@ switch ($action) {
                     $q = $db->prepare('INSERT INTO osoby (imie, nazwisko, mail, telefon, adres) VALUES (?, ?, ?, ?, ?)');
                     $q->bind_param('sssss', $imie_opiekun, $nazwisko_opiekun, $mail_opiekun, $telefon_opiekun, $adres_opiekun);
                     $q->execute();
+                    $osoba_id = $q->insert_id;
+                    if(!isset($_POST['opiekun_stanowisko_checkbox']) || $_POST['opiekun_stanowisko_checkbox'] != 'on') {
+                        $stanowisko_id = isset($_POST['stanowisko_opiekun']) ? $_POST['stanowisko_opiekun'] : 0;
+                    } else {
+                        $nazwa_stanowisko = isset($_POST['opiekun_nowe_stanowisko']) ? $_POST['opiekun_nowe_stanowisko'] : '';
+                        $q = $db->prepare('INSERT INTO stanowiska (nazwa) VALUES (?)');
+                        $q->bind_param('s', $nazwa_stanowisko);
+                        $q->execute();
+                        $stanowisko_id = $q->insert_id;
+                    }
+                    $q = $db->prepare('INSERT INTO pracownicy (osoba, stanowisko, aktywny) VALUES (?, ?, 1)');
+                    $q->bind_param('ii', $osoba_id, $stanowisko_id);
+                    $q->execute();
                     $opiekun_id = $q->insert_id;
                 }
                 $q = $db->prepare('INSERT INTO opiekunowie (klient, pracownik) VALUES (?, ?)');
@@ -165,21 +178,47 @@ switch ($action) {
                 $q->execute();
 
                 // Insert pakiet
-                if (!isset($_POST['pakiet_checkbox']) && $_POST['pakiet_checkbox'] != 'on') {
+                if (!isset($_POST['pakiet_checkbox']) || $_POST['pakiet_checkbox'] != 'on') {
                     $pakiet_id = isset($_POST['pakiet']) ? $_POST['pakiet'] : 0;
                 } else {
                     $nazwa_pakiet = isset($_POST['nazwa_pakiet']) ? $_POST['nazwa_pakiet'] : '';
                     $cena_pakiet = isset($_POST['cena_pakiet']) ? $_POST['cena_pakiet'] : 0;
-                    $czas_trwania_pakiet = isset($_POST['czas_trwania_pakiet']) ? $_POST['czas_trwania_pakiet'] : 0;
                     $q = $db->prepare('INSERT INTO pakiety (nazwa, cena) VALUES (?, ?)');
                     $q->bind_param('sd', $nazwa_pakiet, $cena_pakiet);
                     $q->execute();
                     $pakiet_id = $q->insert_id;
                 }
+                $czas_trwania_pakiet = (isset($_POST['czas_trwania_pakiet'])&&!empty($_POST['czas_trwania_pakiet'])) ? $_POST['czas_trwania_pakiet'] : 0;
                 $data_zakupu = date('Y-m-d');
                 $data_wygasniecia = date('Y-m-d', strtotime("+$czas_trwania_pakiet months"));
-                $q = $db->prepare('INSERT INTO sprzedane_pakiety (pakiet, klient, data_zakupu, data_wygasniecia, cena) VALUES (?, ?, ?, ?, ?)');
-                $q->bind_param('iissd', $pakiet_id, $klient_id, $data_zakupu, $data_wygasniecia, $cena_pakiet);
+                if(!isset($_POST['sprzedawca_checkbox']) || $_POST['sprzedawca_checkbox'] != 'on') {
+                    $sprzedawca_id = isset($_POST['sprzedawca']) ? $_POST['sprzedawca'] : 0;
+                } else {
+                    $imie_sprzedawca = isset($_POST['imie_sprzedawca']) ? $_POST['imie_sprzedawca'] : '';
+                    $nazwisko_sprzedawca = isset($_POST['nazwisko_sprzedawca']) ? $_POST['nazwisko_sprzedawca'] : '';
+                    $mail_sprzedawca = isset($_POST['mail_sprzedawca']) ? $_POST['mail_sprzedawca'] : '';
+                    $telefon_sprzedawca = isset($_POST['telefon_sprzedawca']) ? $_POST['telefon_sprzedawca'] : '';
+                    $adres_sprzedawca = isset($_POST['adres_sprzedawca']) ? $_POST['adres_sprzedawca'] : '';
+                    $q = $db->prepare('INSERT INTO osoby (imie, nazwisko, mail, telefon, adres) VALUES (?, ?, ?, ?, ?)');
+                    $q->bind_param('sssss', $imie_sprzedawca, $nazwisko_sprzedawca, $mail_sprzedawca, $telefon_sprzedawca, $adres_sprzedawca);
+                    $q->execute();
+                    $osoba_id = $q->insert_id;
+                    if(!isset($_POST['sprzedawca_stanowisko_checkbox']) || $_POST['sprzedawca_stanowisko_checkbox'] != 'on') {
+                        $stanowisko_id = isset($_POST['stanowisko_sprzedawca']) ? $_POST['stanowisko_sprzedawca'] : 0;
+                    } else {
+                        $nazwa_stanowisko = isset($_POST['sprzedawca_nowe_stanowisko']) ? $_POST['sprzedawca_nowe_stanowisko'] : '';
+                        $q = $db->prepare('INSERT INTO stanowiska (nazwa) VALUES (?)');
+                        $q->bind_param('s', $nazwa_stanowisko);
+                        $q->execute();
+                        $stanowisko_id = $q->insert_id;
+                    }
+                    $q = $db->prepare('INSERT INTO pracownicy (osoba, stanowisko, aktywny) VALUES (?, ?, 1)');
+                    $q->bind_param('ii', $osoba_id, $stanowisko_id);
+                    $q->execute();
+                    $sprzedawca_id = $q->insert_id;
+                }
+                $q = $db->prepare('INSERT INTO sprzedane_pakiety (pakiet, klient, data_zakupu, data_wygasniecia, cena, sprzedawca) VALUES (?, ?, ?, ?, ?, ?)');
+                $q->bind_param('iissdi', $pakiet_id, $klient_id, $data_zakupu, $data_wygasniecia, $cena_pakiet, $sprzedawca_id);
                 $q->execute();
 
                 $db->commit();
@@ -227,6 +266,16 @@ switch ($action) {
             $pakiety[] = $row;
         }
         echo json_encode($pakiety);
+        break;
+    case 'getstanowiska':
+        $q = $db->prepare('SELECT id, nazwa FROM stanowiska');
+        $q->execute();
+        $r = $q->get_result();
+        $stanowiska = [];
+        while ($row = $r->fetch_assoc()) {
+            $stanowiska[] = $row;
+        }
+        echo json_encode($stanowiska);
         break;
     }
 
