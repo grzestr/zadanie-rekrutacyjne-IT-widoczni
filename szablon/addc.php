@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Dodaj nowego klienta</h1>
-    <form action="/index.php?action=addc" method="post">
+    <form action="/index.php?action=addc" method="post" onsubmit="return validateForm()">
         <fieldset>
             <legend>Dane klienta</legend>
             <label for="nazwa">Nazwa:</label>
@@ -32,9 +32,9 @@
             <div id="kontakt_fields">
             <label for="nowy_kontakt">Dodaj nową osobę kontaktową:</label><br>
             <label for="imie_kontakt">Imię:</label>
-            <input type="text" id="imie_kontakt" name="imie_kontakt"><br>
+            <input type="text" id="imie_kontakt" name="imie_kontakt" data-req="req" required><br>
             <label for="nazwisko_kontakt">Nazwisko:</label>
-            <input type="text" id="nazwisko_kontakt" name="nazwisko_kontakt"><br>
+            <input type="text" id="nazwisko_kontakt" name="nazwisko_kontakt" data-req="req" required><br>
             <label for="mail_kontakt">Email:</label>
             <input type="email" id="mail_kontakt" name="mail_kontakt"><br>
             <label for="telefon_kontakt">Telefon:</label>
@@ -49,14 +49,21 @@
             var checkbox = document.getElementById('kontakt_checkbox');
             var kontaktSelect = document.getElementById('kontakt_select');
             var kontaktFields = document.getElementById('kontakt_fields');
+            var requiredFields = kontaktFields.querySelectorAll('[data-req="req"]');
             
             if (checkbox.checked) {
                 kontaktSelect.style.display = 'block';
                 kontaktFields.style.display = 'none';
+                requiredFields.forEach(function(field) {
+                    field.removeAttribute('required');
+                });
                 loadContacts();
             } else {
                 kontaktSelect.style.display = 'none';
                 kontaktFields.style.display = 'block';
+                requiredFields.forEach(function(field) {
+                    field.setAttribute('required', 'required');
+                });
             }
             }
 
@@ -67,7 +74,7 @@
                 if (xhr.status === 200) {
                 var contacts = JSON.parse(xhr.responseText);
                 var select = document.getElementById('kontakt');
-                select.innerHTML = ''; // Clear existing options
+                select.innerHTML = ''; // Wyczyść istniejące opcje
                 contacts.forEach(function(contact) {
                     var option = document.createElement('option');
                     option.value = contact.id;
@@ -97,9 +104,9 @@
             <div id="opiekun_fields" style="display:none;">
             <label for="nowy_opiekun">Dodaj nowego opiekuna:</label><br>
             <label for="imie_opiekun">Imię:</label>
-            <input type="text" id="imie_opiekun" name="imie_opiekun"><br>
+            <input type="text" id="imie_opiekun" name="imie_opiekun" data-req="req" required><br>
             <label for="nazwisko_opiekun">Nazwisko:</label>
-            <input type="text" id="nazwisko_opiekun" name="nazwisko_opiekun"><br>
+            <input type="text" id="nazwisko_opiekun" name="nazwisko_opiekun" data-req="req" required><br>
             <label for="mail_opiekun">Email:</label>
             <input type="email" id="mail_opiekun" name="mail_opiekun"><br>
             <label for="telefon_opiekun">Telefon:</label>
@@ -124,7 +131,7 @@
             <div id="pakiet_fields" style="display:none;">
             <label for="nowy_pakiet">Dodaj nowy pakiet:</label><br>
             <label for="nazwa_pakiet">Nazwa:</label>
-            <input type="text" id="nazwa_pakiet" name="nazwa_pakiet"><br>
+            <input type="text" id="nazwa_pakiet" name="nazwa_pakiet" data-req="req" required><br>
             <label for="cena_pakiet">Cena:</label>
             <input type="number" step="0.01" id="cena_pakiet" name="cena_pakiet"><br>
             <label for="czas_trwania_pakiet">Czas trwania (w miesiącach):</label>
@@ -147,92 +154,114 @@
                     document.getElementById('data_wygasniecia_pakiet').value = dataWygasniecia;
                 }
             }
-        </script>
 
-        <script>
             function togglePakietFields() {
-            var checkbox = document.getElementById('pakiet_checkbox');
-            var pakietSelect = document.getElementById('pakiet_select');
-            var pakietFields = document.getElementById('pakiet_fields');
-            
-            if (checkbox.checked) {
-            pakietSelect.style.display = 'none';
-            pakietFields.style.display = 'block';
-            } else {
-            pakietSelect.style.display = 'block';
-            pakietFields.style.display = 'none';
-            loadPakiety();
-            }
+                var checkbox = document.getElementById('pakiet_checkbox');
+                var pakietSelect = document.getElementById('pakiet_select');
+                var pakietFields = document.getElementById('pakiet_fields');
+                var requiredFields = pakietFields.querySelectorAll('[data-req="req"]');
+                
+                if (checkbox.checked) {
+                    pakietSelect.style.display = 'none';
+                    pakietFields.style.display = 'block';
+                    requiredFields.forEach(function(field) {
+                        field.setAttribute('required', 'required');
+                    });
+                } else {
+                    pakietSelect.style.display = 'block';
+                    pakietFields.style.display = 'none';
+                    requiredFields.forEach(function(field) {
+                        field.removeAttribute('required');
+                    });
+                    loadPakiety();
+                }
             }
 
             function loadPakiety() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/index.php?action=getpakiety', true);
-            xhr.onload = function() {
-            if (xhr.status === 200) {
-            var pakiety = JSON.parse(xhr.responseText);
-            var select = document.getElementById('pakiet');
-            select.innerHTML = ''; // Clear existing options
-            pakiety.forEach(function(pakiet) {
-                var option = document.createElement('option');
-                option.value = pakiet.id;
-                option.textContent = pakiet.nazwa + ' (' + pakiet.cena + ' PLN)';
-                select.appendChild(option);
-            });
-            } else {
-            console.error('Failed to load pakiety');
-            }
-            };
-            xhr.send();
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/index.php?action=getpakiety', true);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        var pakiety = JSON.parse(xhr.responseText);
+                        var select = document.getElementById('pakiet');
+                        select.innerHTML = ''; // Clear existing options
+                        pakiety.forEach(function(pakiet) {
+                            var option = document.createElement('option');
+                            option.value = pakiet.id;
+                            option.textContent = pakiet.nazwa + ' (' + pakiet.cena + ' PLN)';
+                            select.appendChild(option);
+                        });
+                    } else {
+                        console.error('Failed to load pakiety');
+                    }
+                };
+                xhr.send();
             }
 
-            // Load pakiety when the page loads
+            // Załaduj pakiety, gdy strona się załaduje
             document.addEventListener('DOMContentLoaded', function() {
-            loadPakiety();
+                loadPakiety();
             });
-        </script>
 
-        <script>
             function toggleOpiekunFields() {
-            var checkbox = document.getElementById('opiekun_checkbox');
-            var opiekunSelect = document.getElementById('opiekun_select');
-            var opiekunFields = document.getElementById('opiekun_fields');
-            
-            if (checkbox.checked) {
-                opiekunSelect.style.display = 'none';
-                opiekunFields.style.display = 'block';
-            } else {
-                opiekunSelect.style.display = 'block';
-                opiekunFields.style.display = 'none';
-                loadWorkers();
-            }
+                var checkbox = document.getElementById('opiekun_checkbox');
+                var opiekunSelect = document.getElementById('opiekun_select');
+                var opiekunFields = document.getElementById('opiekun_fields');
+                var requiredFields = opiekunFields.querySelectorAll('[data-req="req"]');
+                
+                if (checkbox.checked) {
+                    opiekunSelect.style.display = 'none';
+                    opiekunFields.style.display = 'block';
+                    requiredFields.forEach(function(field) {
+                        field.setAttribute('required', 'required');
+                    });
+                } else {
+                    opiekunSelect.style.display = 'block';
+                    opiekunFields.style.display = 'none';
+                    requiredFields.forEach(function(field) {
+                        field.removeAttribute('required');
+                    });
+                    loadWorkers();
+                }
             }
 
             function loadWorkers() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/index.php?action=getworkers', true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                var workers = JSON.parse(xhr.responseText);
-                var select = document.getElementById('opiekun');
-                select.innerHTML = ''; // Clear existing options
-                workers.forEach(function(worker) {
-                    var option = document.createElement('option');
-                    option.value = worker.id;
-                    option.textContent = worker.imie + ' ' + worker.nazwisko + ' (' + worker.stanowisko + ')';
-                    select.appendChild(option);
-                });
-                } else {
-                console.error('Failed to load workers');
-                }
-            };
-            xhr.send();
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/index.php?action=getworkers', true);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        var workers = JSON.parse(xhr.responseText);
+                        var select = document.getElementById('opiekun');
+                        select.innerHTML = ''; // Clear existing options
+                        workers.forEach(function(worker) {
+                            var option = document.createElement('option');
+                            option.value = worker.id;
+                            option.textContent = worker.imie + ' ' + worker.nazwisko + ' (' + worker.stanowisko + ')';
+                            select.appendChild(option);
+                        });
+                    } else {
+                        console.error('Failed to load workers');
+                    }
+                };
+                xhr.send();
             }
 
-            // Load workers when the page loads
+            // Załaduj pracowników, gdy strona się załaduje
             document.addEventListener('DOMContentLoaded', function() {
-            loadWorkers();
+                loadWorkers();
             });
+
+            function validateForm() {
+                var requiredFields = document.querySelectorAll('input[required], textarea[required]');
+                for (var i = 0; i < requiredFields.length; i++) {
+                    if (requiredFields[i].offsetParent !== null && !requiredFields[i].value) {
+                        alert('Proszę wypełnić wszystkie wymagane pola.');
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
         </script>
         
         <input type="submit" value="Dodaj klienta">
