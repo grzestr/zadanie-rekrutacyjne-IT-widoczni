@@ -332,6 +332,50 @@ switch ($action) {
             header('Location: /?action=details&id=' . $_GET['idc']);
         }
         break;
+    case 'addguardian':
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $db->begin_transaction();
+            try {
+                if (!isset($_POST['opiekun_checkbox']) || $_POST['opiekun_checkbox'] != 'on') {
+                    $opiekun_id = isset($_POST['opiekun']) ? $_POST['opiekun'] : 0;
+                } else {
+                    $imie_opiekun = isset($_POST['imie']) ? $_POST['imie'] : '';
+                    $nazwisko_opiekun = isset($_POST['nazwisko']) ? $_POST['nazwisko'] : '';
+                    $mail_opiekun = isset($_POST['mail']) ? $_POST['mail'] : '';
+                    $telefon_opiekun = isset($_POST['telefon']) ? $_POST['telefon'] : '';
+                    $adres_opiekun = isset($_POST['adres']) ? $_POST['adres'] : '';
+                    $q = $db->prepare('INSERT INTO osoby (imie, nazwisko, mail, telefon, adres) VALUES (?, ?, ?, ?, ?)');
+                    $q->bind_param('sssss', $imie_opiekun, $nazwisko_opiekun, $mail_opiekun, $telefon_opiekun, $adres_opiekun);
+                    $q->execute();
+                    $osoba_id = $q->insert_id;
+                    if(!isset($_POST['opiekun_stanowisko_checkbox']) || $_POST['opiekun_stanowisko_checkbox'] != 'on') {
+                        $stanowisko_id = isset($_POST['stanowisko_opiekun']) ? $_POST['stanowisko_opiekun'] : 0;
+                    } else {
+                        $nazwa_stanowisko = isset($_POST['opiekun_nowe_stanowisko']) ? $_POST['opiekun_nowe_stanowisko'] : '';
+                        $q = $db->prepare('INSERT INTO stanowiska (nazwa) VALUES (?)');
+                        $q->bind_param('s', $nazwa_stanowisko);
+                        $q->execute();
+                        $stanowisko_id = $q->insert_id;
+                    }
+                    $q = $db->prepare('INSERT INTO pracownicy (osoba, stanowisko, aktywny) VALUES (?, ?, 1)');
+                    $q->bind_param('ii', $osoba_id, $stanowisko_id);
+                    $q->execute();
+                    $opiekun_id = $q->insert_id;
+                }
+                $q = $db->prepare('INSERT INTO opiekunowie (klient, pracownik) VALUES (?, ?)');
+                $q->bind_param('ii', $_GET['idc'], $opiekun_id);
+                $q->execute();
+
+                $db->commit();
+                header('Location: /?action=details&id=' . $_GET['idc']);
+            } catch (Exception $e) {
+                $db->rollback();
+                die('Błąd podczas dodawania opiekuna: ' . $e->getMessage());
+            }
+        } else {
+            header('Location: /?action=details&id=' . $_GET['idc']);
+        }
+        break;
     case 'getcontacts':
         $q = $db->prepare('SELECT id, imie, nazwisko, telefon, mail FROM osoby');
         $q->execute();
