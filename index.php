@@ -20,6 +20,7 @@ switch ($action) {
         $pname = 'Lista klientów';
         $isddtable = true;
         $idp = isset($_GET['idp']) ? $_GET['idp'] : false;
+        $idpa = isset($_GET['idpa']) ? $_GET['idpa'] : false;
         if($idp!==false){
             $q = $db->prepare('
                 SELECT k.*
@@ -28,6 +29,15 @@ switch ($action) {
                 WHERE o.pracownik = ?
             ');
             $q->bind_param('i', $idp);
+            $q->execute();
+        }elseif($idpa!==false){
+            $q = $db->prepare('
+                SELECT k.*
+                FROM klienci k
+                INNER JOIN sprzedane_pakiety sp ON k.id = sp.klient
+                WHERE sp.pakiet = ?
+            ');
+            $q->bind_param('i', $idpa);
             $q->execute();
         }else{
             $q = $db->prepare('SELECT * FROM klienci');
@@ -41,6 +51,9 @@ switch ($action) {
         if($idp!==false){
             $pracownik = getWorkerDetails($idp);
             $pname .= ' pracownika: ' . $pracownik['imie'] . ' ' . $pracownik['nazwisko'] . ' (' . $pracownik['stanowisko'] . ')';
+        }elseif($idpa!==false){
+            $pakiet = getPackageDetail($idpa);
+            $pname .= ' z pakietem: ' . $pakiet['nazwa'];
         }
         @require_once 'szablon/showc.php';
         break;
@@ -63,6 +76,18 @@ switch ($action) {
             $row = $r->fetch_assoc();
         }
         @require_once 'szablon/showw.php';
+        break;
+    case 'showp':
+        $pname = 'Lista pakietów';
+        $isddtable = true;
+        $q = $db->prepare('SELECT * FROM pakiety');
+        $q->execute();
+        $r = $q->get_result();
+        $pakiety = [];
+        while ($row = $r->fetch_assoc()) {
+            $pakiety[] = $row;
+        }
+        @require_once 'szablon/showp.php';
         break;
     case 'details':
         $pname = 'Szczegóły klienta';
@@ -326,6 +351,15 @@ switch ($action) {
             WHERE p.id = ?
         ');
         $q->bind_param('i', $workerId);
+        $q->execute();
+        $result = $q->get_result();
+        return $result->fetch_assoc();
+    }
+
+    function getPackageDetail($idpakiet) {
+        global $db;
+        $q = $db->prepare('SELECT id, nazwa, cena FROM pakiety WHERE id = ?');
+        $q->bind_param('i', $idpakiet);
         $q->execute();
         $result = $q->get_result();
         return $result->fetch_assoc();
