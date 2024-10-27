@@ -30,6 +30,26 @@ switch ($action) {
         }
         @require_once 'szablon/showc.php';
         break;
+    case 'showw':
+        $pname = 'Lista pracowników';
+        $isddtable = true;
+        $q = $db->prepare('
+            SELECT 
+            p.id, o.imie, o.nazwisko, o.telefon, o.mail, s.nazwa AS stanowisko
+            FROM pracownicy p
+            LEFT JOIN osoby o ON p.osoba = o.id
+            LEFT JOIN stanowiska s ON p.stanowisko = s.id
+        ');
+        $q->execute();
+        $r = $q->get_result();
+        $row = $r->fetch_assoc();
+        $pracownicy = [];
+        while ($row) {
+            $pracownicy[] = $row;
+            $row = $r->fetch_assoc();
+        }
+        @require_once 'szablon/showw.php';
+        break;
     case 'details':
         $pname = 'Szczegóły klienta';
         $isddtable = true;

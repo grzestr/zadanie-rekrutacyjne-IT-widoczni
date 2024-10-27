@@ -5,7 +5,13 @@
     <script>
         $(document).ready( function () {
           $('.dttable').each(function(){
-            $(this).DataTable()
+            $(this).DataTable(
+                {
+                    "language": {
+                        "url": "https://cdn.datatables.net/plug-ins/2.1.8/i18n/pl.json"
+                    }
+                }
+            )
           });
         } );
     </script>
