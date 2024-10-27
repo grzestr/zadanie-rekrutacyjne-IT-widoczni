@@ -75,6 +75,10 @@
                         </tbody>
                     </table>
                 </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addcontact">
+                    Dodaj kontakt
+                </button>
+
             </div>
         </div>
         <div class="col-xl-12">
@@ -150,6 +154,108 @@
         </div>
     </div>
 </div>
+<div class="modal" id="addcontact" tabindex="-1" aria-labelledby="addcontactLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dodaj kolejną osobę kontaktową</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/?action=addcontact&idc=<?php echo $klient['klient']['id']; ?>" method="post" onsubmit="return validateForm()">
+                    <label for="kontakt_checkbox" class="form-label">Wybierz istniejący kontakt:</label>
+                    <input type="checkbox" class="form-check-input" id="kontakt_checkbox" name="kontakt_checkbox" onclick="toggleKontaktFields()"><br>
+                    
+                    <div id="kontakt_select" style="display:none;">
+                        <label for="kontakt" class="form-label">Wybierz osobę kontaktową:</label>
+                        <select id="kontakt" class="form-select" name="kontakt">
+                            <!-- Opcje zostaną załadowane dynamicznie -->
+                        </select><br>
+                    </div>
+                    <div id="kontakt_fields">
+                        <div class="mb-3">
+                            <label for="imie" class="form-label">Imię</label>
+                            <input type="text" class="form-control" id="imie" name="imie" data-req="req" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nazwisko" class="form-label">Nazwisko</label>
+                            <input type="text" class="form-control" id="nazwisko" name="nazwisko" data-req="req" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="mail" class="form-label">Mail</label>
+                            <input type="email" class="form-control" id="mail" name="mail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefon" class="form-label">Telefon</label>
+                            <input type="tel" class="form-control" id="telefon" name="telefon">
+                        </div>
+                        <div class="mb-3">
+                            <label for="adres" class="form-label">Adres</label>
+                            <input type="text" class="form-control" id="adres" name="adres">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Dodaj kontakt</button>
+                </form>
+                </div>
+                </div>
+                </div>
+                </div>
+
+                <script>
+                function toggleKontaktFields() {
+                    var checkbox = document.getElementById('kontakt_checkbox');
+                    var kontaktSelect = document.getElementById('kontakt_select');
+                    var kontaktFields = document.getElementById('kontakt_fields');
+                    var requiredFields = kontaktFields.querySelectorAll('[data-req="req"]');
+                    
+                    if (checkbox.checked) {
+                        kontaktSelect.style.display = 'block';
+                        kontaktFields.style.display = 'none';
+                        requiredFields.forEach(function(field) {
+                            field.removeAttribute('required');
+                        });
+                        loadContacts();
+                    } else {
+                        kontaktSelect.style.display = 'none';
+                        kontaktFields.style.display = 'block';
+                        requiredFields.forEach(function(field) {
+                            field.setAttribute('required', 'required');
+                        });
+                    }
+                }
+
+                function loadContacts() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/index.php?action=getcontacts', true);
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            var contacts = JSON.parse(xhr.responseText);
+                            var select = document.getElementById('kontakt');
+                            select.innerHTML = ''; // Wyczyść istniejące opcje
+                            contacts.forEach(function(contact) {
+                                var option = document.createElement('option');
+                                option.value = contact.id;
+                                option.textContent = contact.imie + ' ' + contact.nazwisko + ' (' + contact.telefon + ', ' + contact.mail + ')';
+                                select.appendChild(option);
+                            });
+                        } else {
+                            console.error('Failed to load contacts');
+                        }
+                    };
+                    xhr.send();
+                }
+
+                function validateForm() {
+                    var requiredFields = document.querySelectorAll('input[required], textarea[required]');
+                    for (var i = 0; i < requiredFields.length; i++) {
+                        if (requiredFields[i].offsetParent !== null && !requiredFields[i].value) {
+                            alert('Proszę wypełnić wszystkie wymagane pola.');
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                </script>
 <?php
 /*echo "<pre>";
 echo "Klient:\n";

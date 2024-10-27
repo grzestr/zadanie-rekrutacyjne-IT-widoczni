@@ -301,6 +301,37 @@ switch ($action) {
             @require_once 'szablon/addc.php';
         }
         break;
+    case 'addcontact':
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $db->begin_transaction();
+            try {
+                if (isset($_POST['kontakt_checkbox']) && $_POST['kontakt_checkbox'] == 'on') {
+                    $kontakt_id = isset($_POST['kontakt']) ? $_POST['kontakt'] : 0;
+                } else {
+                    $imie_kontakt = isset($_POST['imie']) ? $_POST['imie'] : '';
+                    $nazwisko_kontakt = isset($_POST['nazwisko']) ? $_POST['nazwisko'] : '';
+                    $mail_kontakt = isset($_POST['mail']) ? $_POST['mail'] : '';
+                    $telefon_kontakt = isset($_POST['telefon']) ? $_POST['telefon'] : '';
+                    $adres_kontakt = isset($_POST['adres']) ? $_POST['adres'] : '';
+                    $q = $db->prepare('INSERT INTO osoby (imie, nazwisko, mail, telefon, adres) VALUES (?, ?, ?, ?, ?)');
+                    $q->bind_param('sssss', $imie_kontakt, $nazwisko_kontakt, $mail_kontakt, $telefon_kontakt, $adres_kontakt);
+                    $q->execute();
+                    $kontakt_id = $q->insert_id;
+                }
+                $q = $db->prepare('INSERT INTO kontakty (osoba, klient, aktywny) VALUES (?, ?, 1)');
+                $q->bind_param('ii', $kontakt_id, $_GET['idc']);
+                $q->execute();
+
+                $db->commit();
+                header('Location: /?action=details&id=' . $_GET['idc']);
+            } catch (Exception $e) {
+                $db->rollback();
+                die('Błąd podczas dodawania kontaktu: ' . $e->getMessage());
+            }
+        } else {
+            header('Location: /?action=details&id=' . $_GET['idc']);
+        }
+        break;
     case 'getcontacts':
         $q = $db->prepare('SELECT id, imie, nazwisko, telefon, mail FROM osoby');
         $q->execute();
