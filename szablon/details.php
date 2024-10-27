@@ -114,6 +114,9 @@
                         </tbody>
                     </table>
                 </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addguardian">
+                    Dodaj opiekuna
+                </button>
             </div>
         </div>
         <div class="col-xl-12">
@@ -196,66 +199,212 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Dodaj kontakt</button>
                 </form>
-                </div>
-                </div>
-                </div>
-                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="modal" id="addguardian" tabindex="-1" aria-labelledby="addguardianLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dodaj kolejnego opiekuna</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/?action=addguardian&idc=<?php echo $klient['klient']['id']; ?>" method="post" onsubmit="return validateForm()">
+                    <label class="form-label" for="opiekun_checkbox">Dodaj nowego opiekuna:</label>
+                    <input type="checkbox" class="form-check-input" id="opiekun_checkbox" name="opiekun_checkbox" onclick="toggleOpiekunFields()"><br>
+                    
+                    <div id="opiekun_select">
+                        <label class="form-label" for="opiekun">Wybierz opiekuna:</label>
+                        <select class="form-select" id="opiekun" name="opiekun">
+                        <!-- Opcje zostaną załadowane dynamicznie -->
+                        </select><br>
+                    </div>
+                    <div id="opiekun_fields" style="display:none;">
+                        <div class="mb-3">
+                            <label for="imie" class="form-label">Imię</label>
+                            <input type="text" class="form-control" id="imie" name="imie" data-req="req">
+                        </div>
+                        <div class="mb-3">
+                            <label for="nazwisko" class="form-label">Nazwisko</label>
+                            <input type="text" class="form-control" id="nazwisko" name="nazwisko" data-req="req">
+                        </div>
+                        <div class="mb-3">
+                            <label for="mail" class="form-label">Mail</label>
+                            <input type="email" class="form-control" id="mail" name="mail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefon" class="form-label">Telefon</label>
+                            <input type="tel" class="form-control" id="telefon" name="telefon">
+                        </div>
+                        <div class="mb-3">
+                            <label for="stanowisko" class="form-label">Stanowisko</label>
+                            <label class="form-label" for="opiekun_stanowisko_checkbox">Dodaj nowe stanowisko:</label>
+                            <input type="checkbox" class="form-check-input" id="opiekun_stanowisko_checkbox" name="opiekun_stanowisko_checkbox" onclick="toggleStanowiskoFields()"><br>
+                            <div id="stanowisko_select">
+                                <label class="form-label" for="stanowisko_opiekun">Wybierz stanowisko:</label>
+                                <select class="form-select" id="stanowisko_opiekun" name="stanowisko_opiekun">
+                                <!-- Opcje zostaną załadowane dynamicznie -->
+                                </select><br>
+                            </div>
+                            <div id="opiekun_stanowisko_fields" style="display:none;">
+                                <label class="form-label" for="opiekun_nowe_stanowisko">Dodaj nowe stanowisko:</label><br>
+                                <input class="form-control" type="text" id="opiekun_nowe_stanowisko" name="opiekun_nowe_stanowisko"><br>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Dodaj opiekuna</button>
+                </form>
                 <script>
-                function toggleKontaktFields() {
-                    var checkbox = document.getElementById('kontakt_checkbox');
-                    var kontaktSelect = document.getElementById('kontakt_select');
-                    var kontaktFields = document.getElementById('kontakt_fields');
-                    var requiredFields = kontaktFields.querySelectorAll('[data-req="req"]');
+                function toggleOpiekunFields() {
+                    var checkbox = document.getElementById('opiekun_checkbox');
+                    var opiekunSelect = document.getElementById('opiekun_select');
+                    var opiekunFields = document.getElementById('opiekun_fields');
+                    var requiredFields = opiekunFields.querySelectorAll('[data-req="req"]');
                     
                     if (checkbox.checked) {
-                        kontaktSelect.style.display = 'block';
-                        kontaktFields.style.display = 'none';
-                        requiredFields.forEach(function(field) {
-                            field.removeAttribute('required');
-                        });
-                        loadContacts();
-                    } else {
-                        kontaktSelect.style.display = 'none';
-                        kontaktFields.style.display = 'block';
+                        opiekunSelect.style.display = 'none';
+                        opiekunFields.style.display = 'block';
                         requiredFields.forEach(function(field) {
                             field.setAttribute('required', 'required');
                         });
+                    } else {
+                        opiekunSelect.style.display = 'block';
+                        opiekunFields.style.display = 'none';
+                        requiredFields.forEach(function(field) {
+                            field.removeAttribute('required');
+                        });
+                        loadWorkers();
                     }
                 }
 
-                function loadContacts() {
+                function toggleStanowiskoFields() {
+                    var checkbox = document.getElementById('opiekun_stanowisko_checkbox');
+                    var stanowiskoSelect = document.getElementById('stanowisko_select');
+                    var stanowiskoFields = document.getElementById('opiekun_stanowisko_fields');
+                    var requiredField = document.getElementById('opiekun_nowe_stanowisko');
+                    
+                    if (checkbox.checked) {
+                        stanowiskoSelect.style.display = 'none';
+                        stanowiskoFields.style.display = 'block';
+                        requiredField.setAttribute('required', 'required');
+                    } else {
+                        stanowiskoSelect.style.display = 'block';
+                        stanowiskoFields.style.display = 'none';
+                        requiredField.removeAttribute('required');
+                        loadStanowiska();
+                    }
+                }
+
+                function loadStanowiska() {
                     var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/index.php?action=getcontacts', true);
+                    xhr.open('GET', '/index.php?action=getstanowiska', true);
                     xhr.onload = function() {
                         if (xhr.status === 200) {
-                            var contacts = JSON.parse(xhr.responseText);
-                            var select = document.getElementById('kontakt');
-                            select.innerHTML = ''; // Wyczyść istniejące opcje
-                            contacts.forEach(function(contact) {
+                            var stanowiska = JSON.parse(xhr.responseText);
+                            var select = document.getElementById('stanowisko_opiekun');
+                            select.innerHTML = ''; // Clear existing options
+                            stanowiska.forEach(function(stanowisko) {
                                 var option = document.createElement('option');
-                                option.value = contact.id;
-                                option.textContent = contact.imie + ' ' + contact.nazwisko + ' (' + contact.telefon + ', ' + contact.mail + ')';
+                                option.value = stanowisko.id;
+                                option.textContent = stanowisko.nazwa;
                                 select.appendChild(option);
                             });
                         } else {
-                            console.error('Failed to load contacts');
+                            console.error('Failed to load stanowiska');
+                        }
+                    }
+                    xhr.send();
+                }
+
+                function loadWorkers() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/index.php?action=getworkers', true);
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            var workers = JSON.parse(xhr.responseText);
+                            var opiekunSelect = document.getElementById('opiekun');
+                            opiekunSelect.innerHTML = ''; // Clear existing options
+                            workers.forEach(function(worker) {
+                                var option = document.createElement('option');
+                                option.value = worker.id;
+                                option.textContent = worker.imie + ' ' + worker.nazwisko + ' (' + worker.stanowisko + ')';
+                                opiekunSelect.appendChild(option);
+                            });
+                        } else {
+                            console.error('Failed to load workers');
                         }
                     };
                     xhr.send();
                 }
-
-                function validateForm() {
-                    var requiredFields = document.querySelectorAll('input[required], textarea[required]');
-                    for (var i = 0; i < requiredFields.length; i++) {
-                        if (requiredFields[i].offsetParent !== null && !requiredFields[i].value) {
-                            alert('Proszę wypełnić wszystkie wymagane pola.');
-                            return false;
-                        }
-                    }
-                    return true;
-                }
                 </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleKontaktFields() {
+    var checkbox = document.getElementById('kontakt_checkbox');
+    var kontaktSelect = document.getElementById('kontakt_select');
+    var kontaktFields = document.getElementById('kontakt_fields');
+    var requiredFields = kontaktFields.querySelectorAll('[data-req="req"]');
+    
+    if (checkbox.checked) {
+        kontaktSelect.style.display = 'block';
+        kontaktFields.style.display = 'none';
+        requiredFields.forEach(function(field) {
+            field.removeAttribute('required');
+        });
+        loadContacts();
+    } else {
+        kontaktSelect.style.display = 'none';
+        kontaktFields.style.display = 'block';
+        requiredFields.forEach(function(field) {
+            field.setAttribute('required', 'required');
+        });
+    }
+}
+
+function loadContacts() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/index.php?action=getcontacts', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var contacts = JSON.parse(xhr.responseText);
+            var select = document.getElementById('kontakt');
+            select.innerHTML = ''; // Wyczyść istniejące opcje
+            contacts.forEach(function(contact) {
+                var option = document.createElement('option');
+                option.value = contact.id;
+                option.textContent = contact.imie + ' ' + contact.nazwisko + ' (' + contact.telefon + ', ' + contact.mail + ')';
+                select.appendChild(option);
+            });
+        } else {
+            console.error('Failed to load contacts');
+        }
+    };
+    xhr.send();
+}
+
+function validateForm() {
+    var requiredFields = document.querySelectorAll('input[required], textarea[required]');
+    for (var i = 0; i < requiredFields.length; i++) {
+        if (requiredFields[i].offsetParent !== null && !requiredFields[i].value) {
+            alert('Proszę wypełnić wszystkie wymagane pola.');
+            return false;
+        }
+    }
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+                    loadWorkers();
+                    loadStanowiska();
+                });
+</script>
 <?php
 /*echo "<pre>";
 echo "Klient:\n";
