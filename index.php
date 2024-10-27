@@ -89,6 +89,17 @@ switch ($action) {
         }
         @require_once 'szablon/showp.php';
         break;
+    case 'deletecp':
+        $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
+        $idspa = isset($_GET['idspa']) ? $_GET['idspa'] : 0;
+        if ($idc == 0 || $idspa == 0) {
+            die('Nieprawidłowe ID klienta lub pakietu');
+        }
+        $q = $db->prepare('DELETE FROM sprzedane_pakiety WHERE klient = ? AND id = ?');
+        $q->bind_param('ii', $idc, $idspa);
+        $q->execute();
+        header('Location: /?action=details&id=' . $idc);
+        break;
     case 'details':
         $pname = 'Szczegóły klienta';
         $isddtable = true;
