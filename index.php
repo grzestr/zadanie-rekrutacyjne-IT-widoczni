@@ -19,15 +19,27 @@ switch ($action) {
     case 'showc':
         $pname = 'Lista klientów';
         $isddtable = true;
-        $q = $db->prepare('SELECT * FROM klienci');
-        $q->execute();
-        $r = $q->get_result();
-        $row = $r->fetch_assoc();
-        $klienci = [];
-        while ($row) {
-            $klienci[] = $row;
-            $row = $r->fetch_assoc();
+        $idp = isset($_GET['idp']) ? $_GET['idp'] : false;
+        if($idp!==false){
+            $q = $db->prepare('
+                SELECT k.*
+                FROM klienci k
+                INNER JOIN opiekunowie o ON k.id = o.klient
+                WHERE o.pracownik = ?
+            ');
+            $q->bind_param('i', $idp);
+            $q->execute();
+        }else{
+            $q = $db->prepare('SELECT * FROM klienci');
+            $q->execute();
         }
+        $r = $q->get_result();
+        $klienci = [];
+        while ($row = $r->fetch_assoc()) {
+            $klienci[] = $row;
+        }
+        $pracownik = getWorkerDetails($idp);
+        $pname .= ' pracownika: ' . $pracownik['imie'] . ' ' . $pracownik['nazwisko'] . ' (' . $pracownik['stanowisko'] . ')';
         @require_once 'szablon/showc.php';
         break;
     case 'showw':
@@ -297,6 +309,24 @@ switch ($action) {
         }
         echo json_encode($stanowiska);
         break;
+    }
+    
+    function getWorkerDetails($workerId) {
+        global $db;
+        $q = $db->prepare('
+            SELECT 
+            p.id, p.aktywny, 
+            o.imie, o.nazwisko, o.telefon, o.mail, o.adres, 
+            s.nazwa AS stanowisko
+            FROM pracownicy p
+            LEFT JOIN osoby o ON p.osoba = o.id
+            LEFT JOIN stanowiska s ON p.stanowisko = s.id
+            WHERE p.id = ?
+        ');
+        $q->bind_param('i', $workerId);
+        $q->execute();
+        $result = $q->get_result();
+        return $result->fetch_assoc();
     }
 
 $db->close();
