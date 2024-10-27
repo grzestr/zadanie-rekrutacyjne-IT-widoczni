@@ -38,8 +38,10 @@ switch ($action) {
         while ($row = $r->fetch_assoc()) {
             $klienci[] = $row;
         }
-        $pracownik = getWorkerDetails($idp);
-        $pname .= ' pracownika: ' . $pracownik['imie'] . ' ' . $pracownik['nazwisko'] . ' (' . $pracownik['stanowisko'] . ')';
+        if($idp!==false){
+            $pracownik = getWorkerDetails($idp);
+            $pname .= ' pracownika: ' . $pracownik['imie'] . ' ' . $pracownik['nazwisko'] . ' (' . $pracownik['stanowisko'] . ')';
+        }
         @require_once 'szablon/showc.php';
         break;
     case 'showw':
