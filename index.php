@@ -111,6 +111,17 @@ switch ($action) {
         $q->execute();
         header('Location: /?action=details&id=' . $idc);
         break;
+    case 'deletecc':
+        $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
+        $idk = isset($_GET['idk']) ? $_GET['idk'] : 0;
+        if ($idc == 0 || $idk == 0) {
+            die('Nieprawidłowe ID klienta lub kontaktu');
+        }
+        $q = $db->prepare('DELETE FROM kontakty WHERE klient = ? AND id = ?');
+        $q->bind_param('ii', $idc, $idk);
+        $q->execute();
+        header('Location: /?action=details&id=' . $idc);
+        break;
     case 'details':
         $pname = 'Szczegóły klienta';
         $isddtable = true;
