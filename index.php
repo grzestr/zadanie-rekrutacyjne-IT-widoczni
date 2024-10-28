@@ -100,6 +100,17 @@ switch ($action) {
         $q->execute();
         header('Location: /?action=details&id=' . $idc);
         break;
+    case 'deletecg':
+        $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
+        $idop = isset($_GET['idop']) ? $_GET['idop'] : 0;
+        if ($idc == 0 || $idop == 0) {
+            die('Nieprawidłowe ID klienta lub opiekuna');
+        }
+        $q = $db->prepare('DELETE FROM opiekunowie WHERE klient = ? AND id = ?');
+        $q->bind_param('ii', $idc, $idop);
+        $q->execute();
+        header('Location: /?action=details&id=' . $idc);
+        break;
     case 'details':
         $pname = 'Szczegóły klienta';
         $isddtable = true;
