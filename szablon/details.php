@@ -141,7 +141,7 @@
                                 <tr>
                                     <td><?php echo $pakiet['pakiet_nazwa']; ?></td>
                                     <td><?php echo $pakiet['data_zakupu']; ?></td>
-                                    <td><?php echo $pakiet['data_wygasniecia']; ?></td>
+                                    <td><?php echo $pakiet['data_wygasniecia']=='1970-01-01'?'Bezterminowy':$pakiet['data_wygasniecia']; ?></td>
                                     <td><?php echo $pakiet['pakiet_cena']; ?></td>
                                     <td><?php echo $pakiet['imie'].' '.$pakiet['nazwisko'].' ('.$pakiet['stanowisko_nazwa'].')'; ?></td>
                                     <td><a href="/?action=deletecp&idc=<?php echo $klient['klient']['id']; ?>&idspa=<?php echo $pakiet['sprzedany_pakiet_id']; ?>" title="Usuń pakiet"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
