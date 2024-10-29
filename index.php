@@ -21,6 +21,7 @@ switch ($action) {
         $isddtable = true;
         $idp = isset($_GET['idp']) ? $_GET['idp'] : false;
         $idpa = isset($_GET['idpa']) ? $_GET['idpa'] : false;
+        $idco = isset($_GET['idco']) ? $_GET['idco'] : false;
         if($idp!==false){
             $q = $db->prepare('
                 SELECT k.*
@@ -39,6 +40,15 @@ switch ($action) {
             ');
             $q->bind_param('i', $idpa);
             $q->execute();
+        }elseif($idco!==false){
+            $q = $db->prepare('
+                SELECT k.*
+                FROM klienci k
+                INNER JOIN kontakty ko ON k.id = ko.klient
+                WHERE ko.id = ?
+            ');
+            $q->bind_param('i', $idco);
+            $q->execute();
         }else{
             $q = $db->prepare('SELECT * FROM klienci');
             $q->execute();
@@ -54,6 +64,9 @@ switch ($action) {
         }elseif($idpa!==false){
             $pakiet = getPackageDetail($idpa);
             $pname .= ' z pakietem: ' . $pakiet['nazwa'];
+        }elseif($idco!==false){
+            $kontakt = getContactDetail($idco);
+            $pname .= ' kontaktu: ' . $kontakt['imie'] . ' ' . $kontakt['nazwisko'];
         }
         @require_once 'szablon/showc.php';
         break;
@@ -88,6 +101,26 @@ switch ($action) {
             $pakiety[] = $row;
         }
         @require_once 'szablon/showp.php';
+        break;
+    case 'showco':
+        $pname = 'Lista kontaktów';
+        $isddtable = true;
+        $q = $db->prepare('
+            SELECT 
+            ko.id AS kontakt_id, ko.aktywny AS kontakt_aktywny,
+            o.id AS osoba_id, o.imie, o.nazwisko, o.mail, o.telefon, o.adres,
+            k.id AS klient_id, k.nazwa AS klient_nazwa
+            FROM kontakty ko
+            LEFT JOIN osoby o ON o.id = ko.osoba
+            LEFT JOIN klienci k ON k.id = ko.klient
+        ');
+        $q->execute();
+        $r = $q->get_result();
+        $kontakty = [];
+        while ($row = $r->fetch_assoc()) {
+            $kontakty[] = $row;
+        }
+        @require_once 'szablon/showco.php';
         break;
     case 'deletecp':
         $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
@@ -525,6 +558,24 @@ switch ($action) {
         global $db;
         $q = $db->prepare('SELECT id, nazwa, cena FROM pakiety WHERE id = ?');
         $q->bind_param('i', $idpakiet);
+        $q->execute();
+        $result = $q->get_result();
+        return $result->fetch_assoc();
+    }
+
+    function getContactDetail($idkontakt) {
+        global $db;
+        $q = $db->prepare('
+            SELECT 
+            ko.id AS kontakt_id, ko.aktywny AS kontakt_aktywny,
+            o.id AS osoba_id, o.imie, o.nazwisko, o.mail, o.telefon, o.adres,
+            k.id AS klient_id, k.nazwa AS klient_nazwa
+            FROM kontakty ko
+            LEFT JOIN osoby o ON o.id = ko.osoba
+            LEFT JOIN klienci k ON k.id = ko.klient
+            WHERE ko.id = ?
+        ');
+        $q->bind_param('i', $idkontakt);
         $q->execute();
         $result = $q->get_result();
         return $result->fetch_assoc();
