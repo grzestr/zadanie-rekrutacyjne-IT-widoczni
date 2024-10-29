@@ -570,24 +570,6 @@ switch ($action) {
         return $result->fetch_assoc();
     }
 
-    /*function getContactDetail($idkontakt) {
-        global $db;
-        $q = $db->prepare('
-            SELECT 
-            ko.id AS kontakt_id, ko.aktywny AS kontakt_aktywny,
-            o.id AS osoba_id, o.imie, o.nazwisko, o.mail, o.telefon, o.adres,
-            k.id AS klient_id, k.nazwa AS klient_nazwa
-            FROM kontakty ko
-            LEFT JOIN osoby o ON o.id = ko.osoba
-            LEFT JOIN klienci k ON k.id = ko.klient
-            WHERE ko.id = ?
-        ');
-        $q->bind_param('i', $idkontakt);
-        $q->execute();
-        $result = $q->get_result();
-        return $result->fetch_assoc();
-    }*/
-
 $db->close();
 
 ?>
