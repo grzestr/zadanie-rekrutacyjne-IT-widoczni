@@ -21,7 +21,7 @@ switch ($action) {
         $isddtable = true;
         $idp = isset($_GET['idp']) ? $_GET['idp'] : false;
         $idpa = isset($_GET['idpa']) ? $_GET['idpa'] : false;
-        $idco = isset($_GET['idco']) ? $_GET['idco'] : false;
+        $ido = isset($_GET['ido']) ? $_GET['ido'] : false;
         if($idp!==false){
             $q = $db->prepare('
                 SELECT k.*
@@ -40,14 +40,15 @@ switch ($action) {
             ');
             $q->bind_param('i', $idpa);
             $q->execute();
-        }elseif($idco!==false){
+        }elseif($ido!==false){
             $q = $db->prepare('
                 SELECT k.*
                 FROM klienci k
                 INNER JOIN kontakty ko ON k.id = ko.klient
-                WHERE ko.id = ?
+                INNER JOIN osoby o ON ko.osoba = o.id
+                WHERE o.id = ?
             ');
-            $q->bind_param('i', $idco);
+            $q->bind_param('i', $ido);
             $q->execute();
         }else{
             $q = $db->prepare('SELECT * FROM klienci');
@@ -64,8 +65,8 @@ switch ($action) {
         }elseif($idpa!==false){
             $pakiet = getPackageDetail($idpa);
             $pname .= ' z pakietem: ' . $pakiet['nazwa'];
-        }elseif($idco!==false){
-            $kontakt = getContactDetail($idco);
+        }elseif($ido!==false){
+            $kontakt = getPersonDetail($ido);
             $pname .= ' kontaktu: ' . $kontakt['imie'] . ' ' . $kontakt['nazwisko'];
         }
         @require_once 'szablon/showc.php';
@@ -106,13 +107,10 @@ switch ($action) {
         $pname = 'Lista kontaktów';
         $isddtable = true;
         $q = $db->prepare('
-            SELECT 
-            ko.id AS kontakt_id, ko.aktywny AS kontakt_aktywny,
-            o.id AS osoba_id, o.imie, o.nazwisko, o.mail, o.telefon, o.adres,
-            k.id AS klient_id, k.nazwa AS klient_nazwa
-            FROM kontakty ko
-            LEFT JOIN osoby o ON o.id = ko.osoba
-            LEFT JOIN klienci k ON k.id = ko.klient
+            SELECT DISTINCT
+            o.id AS osoba_id, o.imie, o.nazwisko, o.mail, o.telefon
+            FROM osoby o
+            INNER JOIN kontakty ko ON o.id = ko.osoba
         ');
         $q->execute();
         $r = $q->get_result();
@@ -563,7 +561,16 @@ switch ($action) {
         return $result->fetch_assoc();
     }
 
-    function getContactDetail($idkontakt) {
+    function getPersonDetail($idperson) {
+        global $db;
+        $q = $db->prepare('SELECT id, imie, nazwisko, mail, telefon, adres FROM osoby WHERE id = ?');
+        $q->bind_param('i', $idperson);
+        $q->execute();
+        $result = $q->get_result();
+        return $result->fetch_assoc();
+    }
+
+    /*function getContactDetail($idkontakt) {
         global $db;
         $q = $db->prepare('
             SELECT 
@@ -579,7 +586,7 @@ switch ($action) {
         $q->execute();
         $result = $q->get_result();
         return $result->fetch_assoc();
-    }
+    }*/
 
 $db->close();
 
