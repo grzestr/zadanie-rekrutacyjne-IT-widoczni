@@ -270,89 +270,6 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Dodaj opiekuna</button>
                 </form>
-                <script>
-                function toggleOpiekunFields() {
-                    var checkbox = document.getElementById('opiekun_checkbox');
-                    var opiekunSelect = document.getElementById('opiekun_select');
-                    var opiekunFields = document.getElementById('opiekun_fields');
-                    var requiredFields = opiekunFields.querySelectorAll('[data-req="req"]');
-                    
-                    if (checkbox.checked) {
-                        opiekunSelect.style.display = 'none';
-                        opiekunFields.style.display = 'block';
-                        requiredFields.forEach(function(field) {
-                            field.setAttribute('required', 'required');
-                        });
-                    } else {
-                        opiekunSelect.style.display = 'block';
-                        opiekunFields.style.display = 'none';
-                        requiredFields.forEach(function(field) {
-                            field.removeAttribute('required');
-                        });
-                        loadWorkers();
-                    }
-                }
-
-                function toggleStanowiskoFields() {
-                    var checkbox = document.getElementById('opiekun_stanowisko_checkbox');
-                    var stanowiskoSelect = document.getElementById('stanowisko_select');
-                    var stanowiskoFields = document.getElementById('opiekun_stanowisko_fields');
-                    var requiredField = document.getElementById('opiekun_nowe_stanowisko');
-                    
-                    if (checkbox.checked) {
-                        stanowiskoSelect.style.display = 'none';
-                        stanowiskoFields.style.display = 'block';
-                        requiredField.setAttribute('required', 'required');
-                    } else {
-                        stanowiskoSelect.style.display = 'block';
-                        stanowiskoFields.style.display = 'none';
-                        requiredField.removeAttribute('required');
-                        loadStanowiska();
-                    }
-                }
-
-                function loadStanowiska() {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/index.php?action=getstanowiska', true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            var stanowiska = JSON.parse(xhr.responseText);
-                            var select = document.getElementById('stanowisko_opiekun');
-                            select.innerHTML = ''; // Clear existing options
-                            stanowiska.forEach(function(stanowisko) {
-                                var option = document.createElement('option');
-                                option.value = stanowisko.id;
-                                option.textContent = stanowisko.nazwa;
-                                select.appendChild(option);
-                            });
-                        } else {
-                            console.error('Failed to load stanowiska');
-                        }
-                    }
-                    xhr.send();
-                }
-
-                function loadWorkers() {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/index.php?action=getworkers', true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            var workers = JSON.parse(xhr.responseText);
-                            var opiekunSelect = document.getElementById('opiekun');
-                            opiekunSelect.innerHTML = ''; // Clear existing options
-                            workers.forEach(function(worker) {
-                                var option = document.createElement('option');
-                                option.value = worker.id;
-                                option.textContent = worker.imie + ' ' + worker.nazwisko + ' (' + worker.stanowisko + ')';
-                                opiekunSelect.appendChild(option);
-                            });
-                        } else {
-                            console.error('Failed to load workers');
-                        }
-                    };
-                    xhr.send();
-                }
-                </script>
             </div>
         </div>
     </div>
@@ -433,172 +350,7 @@
                 </form>
 
                 <script>
-                function togglePakietFields() {
-                    var checkbox = document.getElementById('pakiet_checkbox');
-                    var pakietSelect = document.getElementById('pakiet_select');
-                    var pakietFields = document.getElementById('pakiet_fields');
-                    var requiredFields = pakietFields.querySelectorAll('[data-req="req"]');
-                    
-                    if (checkbox.checked) {
-                        pakietSelect.style.display = 'none';
-                        pakietFields.style.display = 'block';
-                        requiredFields.forEach(function(field) {
-                            field.setAttribute('required', 'required');
-                        });
-                    } else {
-                        pakietSelect.style.display = 'block';
-                        pakietFields.style.display = 'none';
-                        requiredFields.forEach(function(field) {
-                            field.removeAttribute('required');
-                        });
-                        loadPakiety();
-                    }
-                }
-
-                function toggleSprzedawcaFields() {
-                    var checkbox = document.getElementById('sprzedawca_checkbox');
-                    var sprzedawcaSelect = document.getElementById('sprzedawca_select');
-                    var sprzedawcaFields = document.getElementById('sprzedawca_fields');
-                    var requiredFields = sprzedawcaFields.querySelectorAll('[data-req="req"]:not(#sprzedawca_nowe_stanowisko)');
-                    
-                    if (checkbox.checked) {
-                        sprzedawcaSelect.style.display = 'none';
-                        sprzedawcaFields.style.display = 'block';
-                        requiredFields.forEach(function(field) {
-                            field.setAttribute('required', 'required');
-                        });
-                    } else {
-                        sprzedawcaSelect.style.display = 'block';
-                        sprzedawcaFields.style.display = 'none';
-                        requiredFields = sprzedawcaFields.querySelectorAll('[data-req="req"]');
-                        requiredFields.forEach(function(field) {
-                            field.removeAttribute('required');
-                        });
-                        loadWorkers();
-                    }
-                }
-
-                function toggleStanowiskoFields() {
-                    var checkbox = document.getElementById('opiekun_stanowisko_checkbox');
-                    var checkboxSprzedawca = document.getElementById('sprzedawca_stanowisko_checkbox');
-                    var stanowiskoSelect = document.getElementById('stanowisko_select');
-                    var stanowiskoSprzedawcaSelect = document.getElementById('sprzedawca_stanowisko_select');
-                    var stanowiskoFields = document.getElementById('opiekun_stanowisko_fields');
-                    var stanowiskoSprzedawcaFields = document.getElementById('sprzedawca_stanowisko_fields');
-                    var requiredFields = stanowiskoFields.querySelectorAll('[data-req="req"]');
-                    var requiredFieldsSprzedawca = stanowiskoSprzedawcaFields.querySelectorAll('[data-req="req"]');
-                    
-                    if (checkbox.checked) {
-                        stanowiskoSelect.style.display = 'none';
-                        stanowiskoFields.style.display = 'block';
-                        requiredFields.forEach(function(field) {
-                            field.setAttribute('required', 'required');
-                        });
-                    } else {
-                        stanowiskoSelect.style.display = 'block';
-                        stanowiskoFields.style.display = 'none';
-                        requiredFields.forEach(function(field) {
-                            field.removeAttribute('required');
-                        });
-                        loadStanowiska();
-                    }
-                    if (checkboxSprzedawca.checked) {
-                        stanowiskoSprzedawcaSelect.style.display = 'none';
-                        stanowiskoSprzedawcaFields.style.display = 'block';
-                        requiredFieldsSprzedawca.forEach(function(field) {
-                            field.setAttribute('required', 'required');
-                        });
-                    } else {
-                        stanowiskoSprzedawcaSelect.style.display = 'block';
-                        stanowiskoSprzedawcaFields.style.display = 'none';
-                        requiredFieldsSprzedawca.forEach(function(field) {
-                            field.removeAttribute('required');
-                        });
-                        loadStanowiska();
-                    }
-                }
-
-                function updatePakietDates() {
-                    var dataSprzedazy = document.getElementById('data_sprzedazy_pakiet').value;
-                    var czasTrwania = document.getElementById('czas_trwania_pakiet').value;
-                    if (dataSprzedazy && czasTrwania) {
-                        var dataSprzedazyDate = new Date(dataSprzedazy);
-                        dataSprzedazyDate.setMonth(dataSprzedazyDate.getMonth() + parseInt(czasTrwania));
-                        var dataWygasniecia = dataSprzedazyDate.toISOString().split('T')[0];
-                        document.getElementById('data_wygasniecia_pakiet').value = dataWygasniecia;
-                    }
-                }
-
-                document.getElementById('data_sprzedazy_pakiet').addEventListener('change', updatePakietDates);
-
-                function loadPakiety() {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/index.php?action=getpakiety', true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            var pakiety = JSON.parse(xhr.responseText);
-                            var select = document.getElementById('pakiet');
-                            select.innerHTML = ''; // Clear existing options
-                            pakiety.forEach(function(pakiet) {
-                                var option = document.createElement('option');
-                                option.value = pakiet.id;
-                                option.textContent = pakiet.nazwa + ' (' + pakiet.cena + ' PLN)';
-                                select.appendChild(option);
-                            });
-                        } else {
-                            console.error('Failed to load pakiety');
-                        }
-                    };
-                    xhr.send();
-                }
-
-                function loadStanowiska() {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/index.php?action=getstanowiska', true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            var stanowiska = JSON.parse(xhr.responseText);
-                            var select = document.getElementById('stanowisko_opiekun');
-                            var sprzedawcaSelect = document.getElementById('stanowisko_sprzedawca');
-                            select.innerHTML = ''; // Clear existing options
-                            sprzedawcaSelect.innerHTML = ''; // Clear existing options
-                            stanowiska.forEach(function(stanowisko) {
-                                var option = document.createElement('option');
-                                option.value = stanowisko.id;
-                                option.textContent = stanowisko.nazwa;
-                                select.appendChild(option);
-                                sprzedawcaSelect.appendChild(option.cloneNode(true)); // Clone the option for sprzedawca
-                            });
-                        } else {
-                            console.error('Failed to load stanowiska');
-                        }
-                    }
-                    xhr.send();
-                }
-
-                function loadWorkers() {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/index.php?action=getworkers', true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            var workers = JSON.parse(xhr.responseText);
-                            var opiekunSelect = document.getElementById('opiekun');
-                            var sprzedawcaSelect = document.getElementById('sprzedawca');
-                            opiekunSelect.innerHTML = ''; // Clear existing options
-                            sprzedawcaSelect.innerHTML = ''; // Clear existing options
-                            workers.forEach(function(worker) {
-                                var option = document.createElement('option');
-                                option.value = worker.id;
-                                option.textContent = worker.imie + ' ' + worker.nazwisko + ' (' + worker.stanowisko + ')';
-                                opiekunSelect.appendChild(option);
-                                sprzedawcaSelect.appendChild(option.cloneNode(true)); // Clone the option for sprzedawca
-                            });
-                        } else {
-                            console.error('Failed to load workers');
-                        }
-                    };
-                    xhr.send();
-                }
+               
                 </script>
             </div>
         </div>
@@ -606,6 +358,188 @@
 </div>
 
 <script>
+function toggleOpiekunFields() {
+    var checkbox = document.getElementById('opiekun_checkbox');
+    var opiekunSelect = document.getElementById('opiekun_select');
+    var opiekunFields = document.getElementById('opiekun_fields');
+    var requiredFields = opiekunFields.querySelectorAll('[data-req="req"]');
+    
+    if (checkbox.checked) {
+        opiekunSelect.style.display = 'none';
+        opiekunFields.style.display = 'block';
+        requiredFields.forEach(function(field) {
+            field.setAttribute('required', 'required');
+        });
+    } else {
+        opiekunSelect.style.display = 'block';
+        opiekunFields.style.display = 'none';
+        requiredFields.forEach(function(field) {
+            field.removeAttribute('required');
+        });
+        loadWorkers();
+    }
+}
+
+function togglePakietFields() {
+    var checkbox = document.getElementById('pakiet_checkbox');
+    var pakietSelect = document.getElementById('pakiet_select');
+    var pakietFields = document.getElementById('pakiet_fields');
+    var requiredFields = pakietFields.querySelectorAll('[data-req="req"]');
+    
+    if (checkbox.checked) {
+        pakietSelect.style.display = 'none';
+        pakietFields.style.display = 'block';
+        requiredFields.forEach(function(field) {
+            field.setAttribute('required', 'required');
+        });
+    } else {
+        pakietSelect.style.display = 'block';
+        pakietFields.style.display = 'none';
+        requiredFields.forEach(function(field) {
+            field.removeAttribute('required');
+        });
+        loadPakiety();
+    }
+}
+function toggleSprzedawcaFields() {
+    var checkbox = document.getElementById('sprzedawca_checkbox');
+    var sprzedawcaSelect = document.getElementById('sprzedawca_select');
+    var sprzedawcaFields = document.getElementById('sprzedawca_fields');
+    var requiredFields = sprzedawcaFields.querySelectorAll('[data-req="req"]:not(#sprzedawca_nowe_stanowisko)');
+    
+    if (checkbox.checked) {
+        sprzedawcaSelect.style.display = 'none';
+        sprzedawcaFields.style.display = 'block';
+        requiredFields.forEach(function(field) {
+            field.setAttribute('required', 'required');
+        });
+    } else {
+        sprzedawcaSelect.style.display = 'block';
+        sprzedawcaFields.style.display = 'none';
+        requiredFields = sprzedawcaFields.querySelectorAll('[data-req="req"]');
+        requiredFields.forEach(function(field) {
+            field.removeAttribute('required');
+        });
+        loadWorkers();
+    }
+}
+function toggleStanowiskoFields() {
+    var checkbox = document.getElementById('opiekun_stanowisko_checkbox');
+    var checkboxSprzedawca = document.getElementById('sprzedawca_stanowisko_checkbox');
+    var stanowiskoSelect = document.getElementById('stanowisko_select');
+    var stanowiskoSprzedawcaSelect = document.getElementById('sprzedawca_stanowisko_select');
+    var stanowiskoFields = document.getElementById('opiekun_stanowisko_fields');
+    var stanowiskoSprzedawcaFields = document.getElementById('sprzedawca_stanowisko_fields');
+    var requiredFields = stanowiskoFields.querySelectorAll('[data-req="req"]');
+    var requiredFieldsSprzedawca = stanowiskoSprzedawcaFields.querySelectorAll('[data-req="req"]');
+    
+    if (checkbox.checked) {
+        stanowiskoSelect.style.display = 'none';
+        stanowiskoFields.style.display = 'block';
+        requiredFields.forEach(function(field) {
+            field.setAttribute('required', 'required');
+        });
+    } else {
+        stanowiskoSelect.style.display = 'block';
+        stanowiskoFields.style.display = 'none';
+        requiredFields.forEach(function(field) {
+            field.removeAttribute('required');
+        });
+        loadStanowiska();
+    }
+    if (checkboxSprzedawca.checked) {
+        stanowiskoSprzedawcaSelect.style.display = 'none';
+        stanowiskoSprzedawcaFields.style.display = 'block';
+        requiredFieldsSprzedawca.forEach(function(field) {
+            field.setAttribute('required', 'required');
+        });
+    } else {
+        stanowiskoSprzedawcaSelect.style.display = 'block';
+        stanowiskoSprzedawcaFields.style.display = 'none';
+        requiredFieldsSprzedawca.forEach(function(field) {
+            field.removeAttribute('required');
+        });
+        loadStanowiska();
+    }
+}
+function updatePakietDates() {
+    var dataSprzedazy = document.getElementById('data_sprzedazy_pakiet').value;
+    var czasTrwania = document.getElementById('czas_trwania_pakiet').value;
+    if (dataSprzedazy && czasTrwania) {
+        var dataSprzedazyDate = new Date(dataSprzedazy);
+        dataSprzedazyDate.setMonth(dataSprzedazyDate.getMonth() + parseInt(czasTrwania));
+        var dataWygasniecia = dataSprzedazyDate.toISOString().split('T')[0];
+        document.getElementById('data_wygasniecia_pakiet').value = dataWygasniecia;
+    }
+}
+document.getElementById('data_sprzedazy_pakiet').addEventListener('change', updatePakietDates);
+function loadPakiety() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/index.php?action=getpakiety', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var pakiety = JSON.parse(xhr.responseText);
+            var select = document.getElementById('pakiet');
+            select.innerHTML = ''; // Clear existing options
+            pakiety.forEach(function(pakiet) {
+                var option = document.createElement('option');
+                option.value = pakiet.id;
+                option.textContent = pakiet.nazwa + ' (' + pakiet.cena + ' PLN)';
+                select.appendChild(option);
+            });
+        } else {
+            console.error('Failed to load pakiety');
+        }
+    };
+    xhr.send();
+}
+function loadStanowiska() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/index.php?action=getstanowiska', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var stanowiska = JSON.parse(xhr.responseText);
+            var select = document.getElementById('stanowisko_opiekun');
+            var sprzedawcaSelect = document.getElementById('stanowisko_sprzedawca');
+            select.innerHTML = ''; // Clear existing options
+            sprzedawcaSelect.innerHTML = ''; // Clear existing options
+            stanowiska.forEach(function(stanowisko) {
+                var option = document.createElement('option');
+                option.value = stanowisko.id;
+                option.textContent = stanowisko.nazwa;
+                select.appendChild(option);
+                sprzedawcaSelect.appendChild(option.cloneNode(true)); // Clone the option for sprzedawca
+            });
+        } else {
+            console.error('Failed to load stanowiska');
+        }
+    }
+    xhr.send();
+}
+function loadWorkers() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/index.php?action=getworkers', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var workers = JSON.parse(xhr.responseText);
+            var opiekunSelect = document.getElementById('opiekun');
+            var sprzedawcaSelect = document.getElementById('sprzedawca');
+            opiekunSelect.innerHTML = ''; // Clear existing options
+            sprzedawcaSelect.innerHTML = ''; // Clear existing options
+            workers.forEach(function(worker) {
+                var option = document.createElement('option');
+                option.value = worker.id;
+                option.textContent = worker.imie + ' ' + worker.nazwisko + ' (' + worker.stanowisko + ')';
+                opiekunSelect.appendChild(option);
+                sprzedawcaSelect.appendChild(option.cloneNode(true)); // Clone the option for sprzedawca
+            });
+        } else {
+            console.error('Failed to load workers');
+        }
+    };
+    xhr.send();
+}
+
 function toggleKontaktFields() {
     var checkbox = document.getElementById('kontakt_checkbox');
     var kontaktSelect = document.getElementById('kontakt_select');
@@ -666,12 +600,4 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadPakiety();
                 });
 </script>
-<?php
-/*echo "<pre>";
-echo "Klient:\n";
-var_dump($klient);
-
-
-echo "</pre>"; */
-?>
 <?php @include_once 'footer.php'; ?>
