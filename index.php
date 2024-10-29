@@ -1,23 +1,29 @@
 <?php
 @require_once 'config.php';
-
+// Akcja do wykonania (domyślnie start)
 $action = isset($_GET['action']) ? $_GET['action'] : 'start';
 
 // Połączenie z bazą danych
 $db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+// Sprawdzenie połączenia z bazą danych i ewentualne wyświetlenie błędu
 if ($db->connect_error) {
     die('Błąd połączenia z bazą danych: ' . $db->connect_error);
 }
 
+// Czy tabela ma być DataTables (domyślnie nie)
 $isddtable = false;
+// Zmienna przechowująca nazwę strony (domyślnie nazwa CMS)
 $pname = CMS_NAME;
 
 switch ($action) {
     case 'start':
+        // Strona startowa
         @require_once 'szablon/start.php';
         break;
     case 'showc':
+        // Lista klientów (showc) - wyświetla listę klientów z możliwością filtrowania po pracowniku, pakiecie lub kontakcie
         $pname = 'Lista klientów';
+        // Tabela ma być DataTables
         $isddtable = true;
         $idp = isset($_GET['idp']) ? $_GET['idp'] : false;
         $idpa = isset($_GET['idpa']) ? $_GET['idpa'] : false;
@@ -72,7 +78,9 @@ switch ($action) {
         @require_once 'szablon/showc.php';
         break;
     case 'showw':
+        // Lista pracowników (showw) - wyświetla listę pracowników
         $pname = 'Lista pracowników';
+        // Tabela ma być DataTables
         $isddtable = true;
         $q = $db->prepare('
             SELECT 
@@ -92,7 +100,9 @@ switch ($action) {
         @require_once 'szablon/showw.php';
         break;
     case 'showp':
+        // Lista pakietów (showp) - wyświetla listę pakietów
         $pname = 'Lista pakietów';
+        // Tabela ma być DataTables
         $isddtable = true;
         $q = $db->prepare('SELECT * FROM pakiety');
         $q->execute();
@@ -104,7 +114,9 @@ switch ($action) {
         @require_once 'szablon/showp.php';
         break;
     case 'showco':
+        // Lista kontaktów (showco) - wyświetla listę kontaktów
         $pname = 'Lista kontaktów';
+        // Tabela ma być DataTables
         $isddtable = true;
         $q = $db->prepare('
             SELECT DISTINCT
@@ -121,6 +133,7 @@ switch ($action) {
         @require_once 'szablon/showco.php';
         break;
     case 'deletecp':
+        // Usuwanie pakietu (deletecp) - usuwa pakiet  z klienta i przekierowuje na stronę klienta
         $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
         $idspa = isset($_GET['idspa']) ? $_GET['idspa'] : 0;
         if ($idc == 0 || $idspa == 0) {
@@ -132,6 +145,7 @@ switch ($action) {
         header('Location: /?action=details&id=' . $idc);
         break;
     case 'deletecg':
+        // Usuwanie opiekuna (deletecg) - usuwa opiekuna z klienta i przekierowuje na stronę klienta
         $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
         $idop = isset($_GET['idop']) ? $_GET['idop'] : 0;
         if ($idc == 0 || $idop == 0) {
@@ -143,6 +157,7 @@ switch ($action) {
         header('Location: /?action=details&id=' . $idc);
         break;
     case 'deletecc':
+        // Usuwanie kontaktu (deletecc) - usuwa kontakt z klienta i przekierowuje na stronę klienta
         $idc = isset($_GET['idc']) ? $_GET['idc'] : 0;
         $idk = isset($_GET['idk']) ? $_GET['idk'] : 0;
         if ($idc == 0 || $idk == 0) {
@@ -154,7 +169,9 @@ switch ($action) {
         header('Location: /?action=details&id=' . $idc);
         break;
     case 'details':
+        // Szczegóły klienta (details) - wyświetla szczegóły klienta
         $pname = 'Szczegóły klienta';
+        // Tabela ma być DataTables
         $isddtable = true;
         $id = isset($_GET['id']) ? $_GET['id'] : 0;
         if ($id == 0) {
@@ -238,8 +255,10 @@ switch ($action) {
         @require_once 'szablon/details.php';    
         break;
     case 'addc':
+        // Dodawanie klienta (addc) - dodaje klienta do bazy danych
         $pname = 'Dodaj klienta';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Rozpocznij transakcję (wszystko albo nic)
             $db->begin_transaction();
             try {
                 // Insert klient
@@ -344,9 +363,11 @@ switch ($action) {
                 $q->bind_param('iissdi', $pakiet_id, $klient_id, $data_zakupu, $data_wygasniecia, $cena_pakiet, $sprzedawca_id);
                 $q->execute();
 
+                // Zakończ transakcję
                 $db->commit();
                 header('Location: /?action=showc');
             } catch (Exception $e) {
+                // W przypadku błędu wycofaj transakcję i wyświetl błąd
                 $db->rollback();
                 die('Błąd podczas dodawania klienta: ' . $e->getMessage());
             }
@@ -355,7 +376,9 @@ switch ($action) {
         }
         break;
     case 'addcontact':
+        // Dodawanie kontaktu (addcontact) - dodaje kontakt do bazy danych i przekierowuje na stronę klienta
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Rozpocznij transakcję (wszystko albo nic)
             $db->begin_transaction();
             try {
                 if (isset($_POST['kontakt_checkbox']) && $_POST['kontakt_checkbox'] == 'on') {
@@ -375,9 +398,11 @@ switch ($action) {
                 $q->bind_param('ii', $kontakt_id, $_GET['idc']);
                 $q->execute();
 
+                // Zakończ transakcję
                 $db->commit();
                 header('Location: /?action=details&id=' . $_GET['idc']);
             } catch (Exception $e) {
+                // W przypadku błędu wycofaj transakcję i wyświetl błąd
                 $db->rollback();
                 die('Błąd podczas dodawania kontaktu: ' . $e->getMessage());
             }
@@ -386,7 +411,9 @@ switch ($action) {
         }
         break;
     case 'addpackage':
+        // Dodawanie pakietu (addpackage) - dodaje pakiet do bazy danych i przekierowuje na stronę klienta
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Rozpocznij transakcję (wszystko albo nic)
             $db->begin_transaction();
             try {
                 if (!isset($_POST['pakiet_checkbox']) || $_POST['pakiet_checkbox'] != 'on') {
@@ -432,9 +459,11 @@ switch ($action) {
                 $q->bind_param('iissdi', $pakiet_id, $_GET['idc'], $data_zakupu, $data_wygasniecia, $cena_pakiet, $sprzedawca_id);
                 $q->execute();
 
+                // Zakończ transakcję
                 $db->commit();
                 header('Location: /?action=details&id=' . $_GET['idc']);
             } catch (Exception $e) {
+                // W przypadku błędu wycofaj transakcję i wyświetl błąd
                 $db->rollback();
                 die('Błąd podczas dodawania pakietu: ' . $e->getMessage());
             }
@@ -443,7 +472,9 @@ switch ($action) {
         }
         break;
     case 'addguardian':
+        // Dodawanie opiekuna (addguardian) - dodaje opiekuna do bazy danych i przekierowuje na stronę klienta
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Rozpocznij transakcję (wszystko albo nic)
             $db->begin_transaction();
             try {
                 if (!isset($_POST['opiekun_checkbox']) || $_POST['opiekun_checkbox'] != 'on') {
@@ -476,9 +507,11 @@ switch ($action) {
                 $q->bind_param('ii', $_GET['idc'], $opiekun_id);
                 $q->execute();
 
+                // Zakończ transakcję
                 $db->commit();
                 header('Location: /?action=details&id=' . $_GET['idc']);
             } catch (Exception $e) {
+                // W przypadku błędu wycofaj transakcję i wyświetl błąd
                 $db->rollback();
                 die('Błąd podczas dodawania opiekuna: ' . $e->getMessage());
             }
@@ -487,6 +520,7 @@ switch ($action) {
         }
         break;
     case 'getcontacts':
+        // Pobierz kontakty (getcontacts) - zwraca listę kontaktów w formacie JSON
         $q = $db->prepare('SELECT id, imie, nazwisko, telefon, mail FROM osoby');
         $q->execute();
         $r = $q->get_result();
@@ -497,6 +531,7 @@ switch ($action) {
         echo json_encode($contacts);
         break;
     case 'getworkers':
+        // Pobierz pracowników (getworkers) - zwraca listę pracowników w formacie JSON
         $q = $db->prepare('
             SELECT 
             p.id, o.imie, o.nazwisko, o.telefon, o.mail, s.nazwa AS stanowisko
@@ -513,6 +548,7 @@ switch ($action) {
         echo json_encode($workers);
         break;
     case 'getpakiety':
+        // Pobierz pakiety (getpakiety) - zwraca listę pakietów w formacie JSON
         $q = $db->prepare('SELECT id, nazwa, cena FROM pakiety');
         $q->execute();
         $r = $q->get_result();
@@ -523,6 +559,7 @@ switch ($action) {
         echo json_encode($pakiety);
         break;
     case 'getstanowiska':
+        // Pobierz stanowiska (getstanowiska) - zwraca listę stanowisk w formacie JSON
         $q = $db->prepare('SELECT id, nazwa FROM stanowiska');
         $q->execute();
         $r = $q->get_result();
@@ -535,6 +572,7 @@ switch ($action) {
     }
     
     function getWorkerDetails($workerId) {
+        // Pobierz dane pracownika
         global $db;
         $q = $db->prepare('
             SELECT 
@@ -553,6 +591,7 @@ switch ($action) {
     }
 
     function getPackageDetail($idpakiet) {
+        // Pobierz dane pakietu
         global $db;
         $q = $db->prepare('SELECT id, nazwa, cena FROM pakiety WHERE id = ?');
         $q->bind_param('i', $idpakiet);
@@ -562,6 +601,7 @@ switch ($action) {
     }
 
     function getPersonDetail($idperson) {
+        // Pobierz dane osoby
         global $db;
         $q = $db->prepare('SELECT id, imie, nazwisko, mail, telefon, adres FROM osoby WHERE id = ?');
         $q->bind_param('i', $idperson);
